@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "534547516203",
+    "project_id": "inclass-be45b",
+    "storage_bucket": "inclass-be45b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534547516203:android:c54ad27bf50b91b906d36e",
+        "android_client_info": {
+          "package_name": "com.rushabh.inclass"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYqBfwF-AjVafndbxQPEzrnqufnui-nC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
