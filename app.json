@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "com.rushabh.inclass",
-      "googleServicesFile": "/google-services.json",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash.png",
         "backgroundColor": "#ffffff"
