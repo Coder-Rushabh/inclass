@@ -19,6 +19,3 @@ export default function App() {
 
 
 
-/*534547516203-5s4l1147ci9bmgnab3aqn7ngertlkfao.apps.googleusercontent.com
-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
-*/
