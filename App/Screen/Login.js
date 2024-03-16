@@ -3,13 +3,11 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 const Login = ({ navigation }) => {
   const handleStudentLogin = () => {
-    // Navigate to student login page
     navigation.navigate('StudentLogin');
 
   };
 
   const handleAdminLogin = () => {
-    // Navigate to admin login page
   };
 
   return (

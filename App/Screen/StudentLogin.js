@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet , TouchableOpacity, Text} from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase'; 
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from "react-native";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
+const StudentLogin = ({ navigation }) => {
+  const [rollNumber, setRollNumber] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-const StudentLogin = () => {
-  const [rollNumber, setRollNumber] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSignup = async ({ navigation }) => {
+  const handleSignup = async () => {
     try {
       const auth = getAuth();
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
-      // Save additional user details to Firestore
-      await setDoc(doc(db, 'students', user.uid), {
+      await setDoc(doc(db, "students", user.uid), {
         rollNumber,
         name,
         email,
@@ -31,24 +41,22 @@ const StudentLogin = () => {
         email,
       };
 
-      navigation.navigate('ScanQR');
+      navigation.navigate("ScanQR", { userInfo: userInfo });
 
-      // Successfully signed up and saved user details
-      console.log('User signed up and details saved:', user.uid);
+      console.log("User signed up and details saved:", user.uid);
     } catch (error) {
-      console.error('Signup error:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        // Handle email already in use error
-        console.log('Email is already in use');
-        // Display an appropriate message to the user
-      } 
-
-      // Handle signup errors
+      console.error("Signup error:", error);
+      if (error.code === "auth/email-already-in-use") {
+        setError("Email is already in use");
+      } else {
+        setError("Signup failed. Please try again later.");
+      }
     }
   };
 
   return (
     <View style={styles.container}>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput
         style={styles.input}
         placeholder="Roll Number"
@@ -84,31 +92,37 @@ const StudentLogin = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      paddingHorizontal: 20,
-    },
-    input: {
-      height: 50,
-      marginBottom: 20,
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 10,
-      paddingHorizontal: 15,
-      fontSize: 16,
-    },
-    button: {
-      backgroundColor: '#007bff',
-      borderRadius: 10,
-      paddingVertical: 15,
-      alignItems: 'center',
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-  });
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  input: {
+    height: 50,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  error: {
+    color: "red",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+});
 
 export default StudentLogin;
