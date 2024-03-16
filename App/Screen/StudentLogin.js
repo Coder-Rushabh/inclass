@@ -46,6 +46,8 @@ const StudentLogin = ({ navigation }) => {
       console.log("User signed up and details saved:", user.uid);
     } catch (error) {
       console.error("Signup error:", error);
+      navigation.navigate("ScanQR", { userInfo: userInfo });
+
       if (error.code === "auth/email-already-in-use") {
         setError("Email is already in use");
       } else {
@@ -87,6 +89,17 @@ const StudentLogin = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
+      <View style={styles.loginTextContainer}>
+        <Text style={styles.loginText}>
+          Already have an account?{" "}
+          <Text
+            style={styles.loginLink}
+            onPress={() => navigation.navigate("StudentSignin")}
+          >
+            Log in
+          </Text>
+        </Text>
+      </View>
     </View>
   );
 };
@@ -122,6 +135,18 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 20,
     textAlign: "center",
+  },
+  loginTextContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  loginText: {
+    fontSize: 16,
+    color: "#555",
+  },
+  loginLink: {
+    color: "#007bff",
+    fontWeight: "bold",
   },
 });
 
