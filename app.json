@@ -18,7 +18,6 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.rushabh.inclass",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash.png",
