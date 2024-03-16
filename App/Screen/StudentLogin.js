@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet , TouchableOpacity, Text} from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase'; 
-import ScanQR from './ScanQR'
 
 
 const StudentLogin = () => {
@@ -32,7 +31,7 @@ const StudentLogin = () => {
         email,
       };
 
-      navigation.navigate(ScanQR, {userInfo});
+      navigation.navigate('ScanQR');
 
       // Successfully signed up and saved user details
       console.log('User signed up and details saved:', user.uid);
@@ -43,7 +42,6 @@ const StudentLogin = () => {
         console.log('Email is already in use');
         // Display an appropriate message to the user
       } 
-      navigation.navigate('ScanQR', {userInfo});
 
       // Handle signup errors
     }
@@ -68,6 +66,8 @@ const StudentLogin = () => {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
@@ -76,27 +76,39 @@ const StudentLogin = () => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Submit" onPress={handleSignup} />
+      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-  },
-});
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+    },
+    input: {
+      height: 50,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+      paddingHorizontal: 15,
+      fontSize: 16,
+    },
+    button: {
+      backgroundColor: '#007bff',
+      borderRadius: 10,
+      paddingVertical: 15,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+  });
 
 export default StudentLogin;
