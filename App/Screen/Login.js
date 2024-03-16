@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import StudentLogin from './StudentLogin'
 
 const Login = ({ navigation }) => {
   const handleStudentLogin = () => {
     // Navigate to student login page
+    navigation.navigate('StudentLogin');
+
   };
 
   const handleAdminLogin = () => {
