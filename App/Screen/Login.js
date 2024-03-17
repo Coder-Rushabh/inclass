@@ -8,6 +8,7 @@ const Login = ({ navigation }) => {
   };
 
   const handleAdminLogin = () => {
+    navigation.navigate('AdminSignup');
   };
 
   return (

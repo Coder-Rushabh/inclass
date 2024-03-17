@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 
 const Success = ({ navigation }) => {
   const handleBack = () => {
@@ -43,6 +43,19 @@ const styles = StyleSheet.create({
   subText: {
     fontSize: 18,
     color: "#444",
+  },
+  backButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 20,
+    paddingHorizontal: 30,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

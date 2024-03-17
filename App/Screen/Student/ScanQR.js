@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, Image, BackHandler } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -19,6 +19,19 @@ const ScanQR = ({ route }) => {
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      showExitConfirmation();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+    return () => backHandler.remove();
+  }, []);
+
+
 
   const handleScan = ({ type, data }) => {
     if (!isScanned && type === BarCodeScanner.Constants.BarCodeType.qr) {
@@ -55,18 +68,41 @@ const ScanQR = ({ route }) => {
     }
   };
 
+  const showExitConfirmation = () => {
+    Alert.alert(
+      'Exit App',
+      'Do you want to exit?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Exit',
+          onPress: () => BackHandler.exitApp(),
+          style: 'destructive',
+        },
+      ],
+      {
+        cancelable: false,
+      }
+    );
+  };
+
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Scan QR Code</Text>
       </View>
       <View style={styles.userInfoContainer}>
-        <Image source={require('../../assets/dp.png')} style={styles.avatar} />
+        <Image source={require('../../../assets/dp.png')} style={styles.avatar} />
         <View style={styles.userInfo}>
           <Text style={styles.nameText}>{userInfo.name}</Text>
           <View style={styles.secondaryInfo}>
-            <Text style={styles.secondaryText}>Roll Number: {userInfo.rollNumber}</Text>
-            <Text style={styles.secondaryText}>Email: {userInfo.email}</Text>
+            <Text style={styles.secondaryText}>{userInfo.rollNumber}</Text>
+            <Text style={styles.secondaryText}>{userInfo.email}</Text>
           </View>
         </View>
       </View>
@@ -101,6 +137,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+    marginTop: 20,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -132,6 +169,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    marginLeft: 20
   },
   secondaryInfo: {
     marginLeft: 20,
