@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
+import { db } from '../firebase'
 
 const StudentSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -10,33 +12,32 @@ const StudentSignin = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const auth = getAuth();
+      // Sign in with email and password
       await signInWithEmailAndPassword(auth, email, password);
 
-      const user = userCredential.user;
+      // Retrieve user's data from Firestore based on email
       const userQuery = query(collection(db, 'students'), where('email', '==', email));
       const querySnapshot = await getDocs(userQuery);
+      let userInfo = {}; // Define userInfo object to store user data
+
       if (!querySnapshot.empty) {
         querySnapshot.forEach(doc => {
           const userData = doc.data();
-          const userName = userData.name;
-          const userRollNumber = userData.rollNumber;
-          
+          userInfo = {
+            name: userData.name,
+            email: userData.email,
+            rollNumber: userData.rollNumber,
+          };
         });
       }
 
-      const userInfo = {
-        userName,
-        email,
-        userRollNumber,
-      };
+      console.log(userInfo);
 
-
-      navigation.navigate('ScanQR', { userInfo: userInfo });
+      // Navigate to ScanQR page with user information
+      navigation.navigate("ScanQR", { userInfo: userInfo });
     } catch (error) {
       console.error('Login error:', error);
-      setError('Incorrect email or password.');
-      navigation.navigate('ScanQR', { userInfo: userInfo });
-
+      setError('Incorrect email or password.'); // Set error message
     }
   };
 
@@ -64,17 +65,15 @@ const StudentSignin = ({ navigation }) => {
 
       <View style={styles.loginTextContainer}>
         <Text style={styles.loginText}>
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <Text
             style={styles.loginLink}
-            onPress={() => navigation.navigate("StudentLogin")}
+            onPress={() => navigation.navigate('StudentLogin')}
           >
             Create here
           </Text>
         </Text>
       </View>
-
-
     </View>
   );
 };
@@ -100,28 +99,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: '#007bff',
     borderRadius: 10,
     paddingVertical: 15,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 20,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   loginTextContainer: {
     marginTop: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   loginText: {
     fontSize: 16,
-    color: "#555",
+    color: '#555',
   },
   loginLink: {
-    color: "#007bff",
-    fontWeight: "bold",
+    color: '#007bff',
+    fontWeight: 'bold',
   },
 });
 

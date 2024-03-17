@@ -1,48 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
-import { RNCamera } from 'react-native-camera';
-import ImagePicker from 'react-native-image-picker';
+import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 const ScanQR = ({ route }) => {
   const { userInfo } = route.params;
 
   const [scannedData, setScannedData] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
 
+
+  
   useEffect(() => {
-    // Decode the scanned QR code
-    if (scannedData) {
-      console.log('Scanned QR Code:', scannedData);
-    }
-  }, [scannedData]);
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
-  const handleScan = ({ data }) => {
-    setScannedData(data);
+  const handleScan = ({ type, data }) => {
+    if (type === BarCodeScanner.Constants.BarCodeType.qr) {
+      setScannedData(data);
+      console.log('Scanned QR Code:', data);
+    }
   };
 
-  const openGallery = () => {
-    // Options for ImagePicker
-    const options = {
-      title: 'Select QR Code',
-      mediaType: 'photo',
-      maxWidth: 300,
-      maxHeight: 300,
-      storageOptions: {
-        skipBackup: true,
-      },
-    };
+  const openGallery = async () => {
+    // Ask for permission to access the media library
+    const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cameraPermission = await Camera.requestCameraPermissionsAsync();
+
+  if (mediaLibraryPermission.status !== 'granted' || cameraPermission.status !== 'granted') {
+    Alert.alert('Permission denied', 'You need to grant permission to access the media library and camera');
+    return;
+  }
 
     // Open gallery
-    ImagePicker.launchImageLibrary(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error:', response.error);
-      } else {
-        // Decode QR code from selected image
-        // For now, let's just display an alert with the image uri
-        Alert.alert('Selected Image:', response.uri);
-      }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
     });
+  
+    if (result.cancelled) {
+      console.log('Image selection cancelled');
+      return;
+    }
+  
+    if (!result.uri) {
+      console.log('Selected image URI is undefined');
+      return;
+    }
   };
 
   return (
@@ -53,17 +61,12 @@ const ScanQR = ({ route }) => {
         <Text style={styles.userInfoText}>{userInfo.email}</Text>
       </View>
       <View style={styles.qrCodeContainer}>
-        <RNCamera
-          style={styles.cameraPreview}
-          onBarCodeRead={handleScan}
-          captureAudio={false}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'OK',
-            buttonNegative: 'Cancel',
-          }}
-        />
+        {hasPermission && (
+          <BarCodeScanner
+            style={styles.cameraPreview}
+            onBarCodeScanned={handleScan}
+          />
+        )}
       </View>
       <TouchableOpacity style={styles.galleryButton} onPress={openGallery}>
         <Text style={styles.galleryButtonText}>Open Gallery</Text>
@@ -108,14 +111,16 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   galleryButton: {
-    backgroundColor: 'blue',
-    padding: 15,
+    backgroundColor: '#007bff',
+    paddingVertical: 15,
     alignItems: 'center',
   },
   galleryButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
   },
+
 });
 
 export default ScanQR;
