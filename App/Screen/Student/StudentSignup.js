@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../../firebase";
 
 const StudentLogin = ({ navigation }) => {
   const [rollNumber, setRollNumber] = useState("");

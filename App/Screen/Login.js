@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 const Login = ({ navigation }) => {
   const handleStudentLogin = () => {
-    navigation.navigate('StudentLogin');
+    navigation.navigate('StudentSignup');
 
   };
 

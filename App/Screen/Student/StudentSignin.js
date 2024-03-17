@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
-import { db } from '../firebase'
+import { db } from '../../firebase'
 
 const StudentSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');

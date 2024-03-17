@@ -22,7 +22,6 @@
       ],
       "@react-native-google-signin/google-signin"
     ],
-
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -34,10 +33,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.rushabh2001123.inclass"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "841ba559-382b-4510-8aff-0a478dc9adf5"
+      }
     }
   }
 }
