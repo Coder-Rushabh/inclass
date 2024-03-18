@@ -9,6 +9,7 @@ const ScanQR = ({ route }) => {
   const { userInfo } = route.params;
   const navigation = useNavigation();
 
+  console.log(userInfo)
   const [scannedData, setScannedData] = useState(null);
   const [hasPermission, setHasPermission] = useState(null);
   const [isScanned, setIsScanned] = useState(false);

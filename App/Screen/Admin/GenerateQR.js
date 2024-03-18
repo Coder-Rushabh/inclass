@@ -1,35 +1,105 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  ScrollView,
+  Share,
+  Platform,
+} from "react-native";
+import QRCode from "react-native-qrcode-svg";
+import * as FileSystem from "expo-file-system";
+import * as Location from "expo-location";
 
 const GenerateQR = ({ route }) => {
-    const { userInfo } = route.params;
+  const { adminInfo } = route.params;
 
-
-    const [subjectName, setSubjectName] = useState('');
-  const [qrValue, setQRValue] = useState('');
+  const [subjectName, setSubjectName] = useState("");
+  const [qrValue, setQRValue] = useState("");
   const qrCodeRef = useRef(null);
 
-  
-
   // Function to handle QR generation
-  const handleGenerateQR = () => {
+
+  const handleGenerateQR = async () => {
     if (!subjectName) {
       // If subject name is empty, return
       return;
     }
-    // Generate QR code value using user info and subject name
-    const qrData = {
-      name: userInfo?.name,
-      email: userInfo.email,
-      subject: subjectName,
-    };
-    const qrString = JSON.stringify(qrData);
-    setQRValue(qrString);
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({});
+
+      const uniqueId = Date.now() + "-" + Math.floor(Math.random() * 1000000);
+      const currentDate = new Date();
+      const formattedDate = currentDate.toISOString().split("T")[0]; // Get only the date part
+
+      const qrData = {
+        uid: uniqueId,
+        name: adminInfo.name,
+        email: adminInfo.email,
+        date: formattedDate,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        subject: subjectName,
+      };
+
+      const qrString = JSON.stringify(qrData);
+      setQRValue(qrString);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+    }
+  };
+
+  const handleShareQR = async () => {
+    try {
+      if (Platform.OS === "ios" || Platform.OS === "android") {
+        const uri = await saveQRToDisk();
+        if (uri) {
+          await Share.share({
+            url: uri,
+          });
+        } else {
+          console.log("No QR code available to share.");
+        }
+      } else {
+        console.log("Sharing QR code is not supported on this platform.");
+      }
+    } catch (error) {
+      console.error("Error sharing QR code:", error);
+    }
+  };
+
+  const saveQRToDisk = async () => {
+    try {
+      if (!qrValue) return null; // Check if QR value is empty
+
+      const base64Data = qrValue.replace(/^data:image\/png;base64,/, ""); // Remove the data URL prefix
+      const path = FileSystem.cacheDirectory + "qrcode.png";
+
+      await FileSystem.writeAsStringAsync(path, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return path;
+    } catch (error) {
+      console.error("Error saving QR code to disk:", error);
+      throw error;
+    }
   };
 
   const handleExpireQR = () => {
     // Clear QR value to expire the QR code
-    setQRValue('');
+    setQRValue("");
+    setSubjectName("");
   };
 
   return (
@@ -39,11 +109,14 @@ const GenerateQR = ({ route }) => {
       </View>
 
       <View style={styles.userInfoContainer}>
-        <Image source={require('../../../assets/dp.png')} style={styles.avatar} />
+        <Image
+          source={require("../../../assets/dp.png")}
+          style={styles.avatar}
+        />
         <View style={styles.userInfo}>
-          <Text style={styles.nameText}>{userInfo.name}</Text>
+          <Text style={styles.nameText}>{adminInfo.name}</Text>
           <View style={styles.secondaryInfo}>
-            <Text style={styles.secondaryText}>Email: {userInfo.email}</Text>
+            <Text style={styles.secondaryText}>{adminInfo.email}</Text>
           </View>
         </View>
       </View>
@@ -57,11 +130,11 @@ const GenerateQR = ({ route }) => {
         />
       </View>
 
-      <View style={styles.qrContainer}>
+      <ScrollView contentContainerStyle={styles.qrContainer}>
         {qrValue ? (
           <QRCode
             value={qrValue}
-            size={200}
+            size={250}
             color="#000"
             backgroundColor="white"
             ref={qrCodeRef}
@@ -69,16 +142,47 @@ const GenerateQR = ({ route }) => {
         ) : (
           <Text style={styles.noQRText}>No QR code generated</Text>
         )}
+      </ScrollView>
+
+      <View style={styles.bottomButtonContainer}>
+      <TouchableOpacity
+  style={[
+    styles.button,
+    qrValue && styles.disabledButton,
+  ]}
+  onPress={handleGenerateQR}
+  disabled={!!qrValue} // Disable if qrValue is truthy
+>
+  <Text
+    style={[styles.buttonText, qrValue && styles.disabledButtonText]}
+  >
+    Generate QR
+  </Text>
+</TouchableOpacity>
+
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            styles.expireButton,
+            !qrValue && styles.disabledButton,
+          ]}
+          onPress={handleExpireQR}
+          disabled={!qrValue}
+        >
+          <Text
+            style={[styles.buttonText, !qrValue && styles.disabledButtonText]}
+          >
+            Expire QR
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleGenerateQR}>
-          <Text style={styles.buttonText}>Generate QR</Text>
+      {qrValue ? (
+        <TouchableOpacity style={styles.shareButton} onPress={handleShareQR}>
+          <Text style={styles.shareButtonText}>Share QR</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.expireButton]} onPress={handleExpireQR}>
-          <Text style={styles.buttonText}>Expire QR</Text>
-        </TouchableOpacity>
-      </View>
+      ) : null}
     </View>
   );
 };
@@ -91,22 +195,23 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#007bff",
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    marginTop: 30,
   },
   userInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 10,
     marginHorizontal: 20,
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -125,8 +230,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nameText: {
+    marginLeft: 20,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   secondaryInfo: {
@@ -134,7 +240,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
     marginBottom: 5,
   },
   inputContainer: {
@@ -144,40 +250,62 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
+  qrContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
   },
+  noQRText: {
+    fontSize: 16,
+    color: "#777",
+  },
+  bottomButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 20,
+  },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     paddingVertical: 15,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 10,
     flex: 1,
     marginRight: 10,
   },
   expireButton: {
-    backgroundColor: '#dc3545', // Change color for expiration button
+    backgroundColor: "#dc3545",
+  },
+  disabledButton: {
+    backgroundColor: "#ccc",
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-  qrContainer: {
-    alignItems: 'center',
-    marginTop: 20,
+  disabledButtonText: {
+    color: "#999",
   },
-  noQRText: {
-    fontSize: 16,
-    color: '#777',
+  shareButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 15,
+    alignItems: "center",
+    borderRadius: 10,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  shareButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
