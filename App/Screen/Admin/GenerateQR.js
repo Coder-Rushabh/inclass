@@ -13,6 +13,8 @@ import {
 import QRCode from "react-native-qrcode-svg";
 import * as FileSystem from "expo-file-system";
 import * as Location from "expo-location";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from '../../firebase'
 
 const GenerateQR = ({ route }) => {
   const { adminInfo } = route.params;
@@ -39,7 +41,7 @@ const GenerateQR = ({ route }) => {
       // Get current location
       const location = await Location.getCurrentPositionAsync({});
 
-      const uniqueId = Date.now() + "-" + Math.floor(Math.random() * 1000000);
+      const uniqueId = Date.now() + Math.floor(Math.random() * 1000000);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString().split("T")[0]; // Get only the date part
 
@@ -55,6 +57,12 @@ const GenerateQR = ({ route }) => {
 
       const qrString = JSON.stringify(qrData);
       setQRValue(qrString);
+
+      await setDoc(doc(db, "attendance", uniqueId.toString()), {
+        
+      });
+
+
     } catch (error) {
       console.error("Error generating QR code:", error);
     }
