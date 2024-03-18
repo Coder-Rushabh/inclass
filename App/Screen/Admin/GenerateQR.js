@@ -23,6 +23,20 @@ const GenerateQR = ({ route }) => {
   const [qrValue, setQRValue] = useState("");
   const qrCodeRef = useRef(null);
 
+  useEffect(() => {
+    const backAction = () => {
+      showExitConfirmation();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   // Function to handle QR generation
 
   const handleGenerateQR = async () => {
@@ -68,6 +82,29 @@ const GenerateQR = ({ route }) => {
     }
   };
 
+
+  const showExitConfirmation = () => {
+    Alert.alert(
+      "Exit App",
+      "Do you want to exit?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Exit",
+          onPress: () => BackHandler.exitApp(),
+          style: "destructive",
+        },
+      ],
+      {
+        cancelable: false,
+      }
+    );
+  };
+
+  
   const handleShareQR = async () => {
     try {
       if (Platform.OS === "ios" || Platform.OS === "android") {
