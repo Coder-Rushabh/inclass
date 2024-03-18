@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 
-const Success = ({ navigation }) => {
+const Success = ({ route, navigation }) => {
+  const { adminDetails } = route.params;
+
   const handleBack = () => {
     // Navigate back to the previous screen
     navigation.goBack();
@@ -14,6 +16,12 @@ const Success = ({ navigation }) => {
         style={styles.successImage}
       />
       <Text style={styles.successText}>Attendance Successfully Marked!</Text>
+
+      <View style={styles.adminDetailsContainer}>
+        <Text style={styles.adminDetailsText}>Admin Name: {adminDetails.name}</Text>
+        <Text style={styles.adminDetailsText}>Subject: {adminDetails.subject}</Text>
+      </View>
+
 
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Text style={styles.backButtonText}>Back to Scan</Text>
@@ -56,6 +64,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  adminDetailsContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+    width: '80%',
+  },
+  adminDetailsText: {
+    fontSize: 16,
+    marginBottom: 5,
   },
 });
 
