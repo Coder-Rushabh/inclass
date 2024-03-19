@@ -8,13 +8,16 @@ import {
   TextInput,
   ScrollView,
   Share,
+  Alert,
   Platform,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as FileSystem from "expo-file-system";
 import * as Location from "expo-location";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from '../../firebase'
+import { BackHandler } from "react-native";
+
 
 const GenerateQR = ({ route }) => {
   const { adminInfo } = route.params;
@@ -83,6 +86,8 @@ const GenerateQR = ({ route }) => {
   };
 
 
+
+
   const showExitConfirmation = () => {
     Alert.alert(
       "Exit App",
@@ -103,7 +108,6 @@ const GenerateQR = ({ route }) => {
       }
     );
   };
-
   
   const handleShareQR = async () => {
     try {
@@ -141,11 +145,74 @@ const GenerateQR = ({ route }) => {
     }
   };
 
-  const handleExpireQR = () => {
-    // Clear QR value to expire the QR code
-    setQRValue("");
-    setSubjectName("");
+const handleExpireQR = async () => {
+    try {
+      if (!qrValue) {
+        console.log("No QR code generated");
+        return;
+      }
+
+      // Download all student details under the provided UID in CSV format
+      const studentDetails = await getStudentDetails(qrValue.uid);
+
+      // Download student details in CSV format
+      await downloadStudentDetailsCSV(studentDetails);
+
+      // Delete the collection with the provided UID
+      await deleteCollection(qrValue.uid);
+
+      // Clear QR value and subject name
+      setQRValue("");
+      setSubjectName("");
+    } catch (error) {
+      console.error("Error expiring QR code:", error);
+    }
   };
+
+  const getStudentDetails = async (uid) => {
+    const studentDetails = [];
+    const querySnapshot = await getDocs(collection(db, "attendance", uid));
+    querySnapshot.forEach((doc) => {
+      studentDetails.push(doc.data());
+    });
+    return studentDetails;
+  };
+
+  const downloadStudentDetailsCSV = async (studentDetails) => {
+    const csvData = convertToCSV(studentDetails); // Implement this function to convert data to CSV format
+    const csvFilePath = FileSystem.cacheDirectory + "student_details.csv";
+    await FileSystem.writeAsStringAsync(csvFilePath, csvData);
+  };
+
+  const deleteCollection = async (uid) => {
+    const querySnapshot = await getDocs(collection(db, "attendance", uid));
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+  };
+
+const convertToCSV = (data) => {
+  if (!data || data.length === 0) {
+    return ""; // If data is empty, return an empty string
+  }
+
+  // Define column headers
+  const headers = Object.keys(data[0]);
+
+  // Construct CSV header row
+  let csv = headers.join(",") + "\n";
+
+  // Construct CSV data rows
+  csv += data
+    .map((student) => {
+      return headers.map((header) => {
+        return student[header];
+      }).join(",");
+    })
+    .join("\n");
+
+  return csv;
+};
 
   return (
     <View style={styles.container}>
