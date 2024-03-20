@@ -10,7 +10,7 @@ import {
   Share,
   Alert,
   Platform,
-  Button
+  Dimensions 
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as FileSystem from "expo-file-system";
@@ -29,6 +29,9 @@ import { BackHandler } from "react-native";
 import ViewShot from 'react-native-view-shot';
 import ShareExtension from 'react-native-share-extension';
 
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 
 const GenerateQR = ({ route, navigation }) => {
@@ -65,30 +68,19 @@ const GenerateQR = ({ route, navigation }) => {
     } else {
       qrData = qrValue;
     }
-
-
       const uid = qrData?.uid;
 
       console.log(uid)
-      // if (!qrValue || !qrValue.uid) {
-      //   console.log("No QR code generated or invalid QR code data");
-      //   return;
-      // }
-  
-      // Fetch student details from Firestore
-      const studentDetails = await getStudentDetails(uid);
-
-      console.log(studentDetails)
+      
 
       // Clear QR value and subject name
       setQRValue("");
       setSubjectName("");
   
       // Navigate user to ShowData page and pass student details as props
-      navigation.navigate('ShowData', { studentDetails: studentDetails });
-  
+      navigation.navigate('ShowData')
       // Delete the document associated with the UID
-      await deleteCollection(uid);
+      await deleteAttendanceData(uid);
     } catch (error) {
       console.error("Error expiring QR code:", error);
     }
@@ -135,7 +127,6 @@ const GenerateQR = ({ route, navigation }) => {
     }
   };
   
-  
   const getStudentDetails = async (uid) => {
     const studentDetails = [];
     console.log("uid", uid);
@@ -159,19 +150,19 @@ const GenerateQR = ({ route, navigation }) => {
     }
   };
   
+  const deleteAttendanceData = async (uid) => {
+    try {
+      // Query documents under "attendance" collection with the specified UID
+      const documentRef = doc(db, 'attendance', uid);
 
-
+      // Delete the document
+      await deleteDoc(documentRef);
   
-  const deleteCollection = async (uid) => {
-    const querySnapshot = await getDocs(collection(db, "attendance", uid));
-    console.log("Query Snapshot:", querySnapshot);
-    querySnapshot.forEach(async (doc) => {
-      console.log("Document Reference:", doc.ref);
-      await deleteDoc(doc.ref);
-    });
-};
-
-  // Function to handle QR generation
+      console.log(`Attendance data for UID ${uid} deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting attendance data:', error);
+    }
+  };
 
   const handleGenerateQR = async () => {
     if (!subjectName) {
@@ -234,8 +225,6 @@ const GenerateQR = ({ route, navigation }) => {
   };
 
  
-
-  
 
  
 
@@ -312,13 +301,14 @@ const GenerateQR = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {qrValue ? (
+      {/* {qrValue ? (
         <TouchableOpacity style={styles.shareButton} onPress={handleShareQRCode}>
           <Text style={styles.shareButtonText}>Share QR</Text>
         </TouchableOpacity>
-      ) : null}
+      ) : null} */}
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -328,22 +318,22 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#007bff",
-    padding: 20,
+    paddingVertical: windowHeight * 0.03,
     alignItems: "center",
   },
   headerText: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: windowHeight * 0.04,
     fontWeight: "bold",
   },
   userInfoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
+    padding: windowWidth * 0.05,
     backgroundColor: "#ffffff",
-    borderRadius: 10,
-    marginHorizontal: 20,
-    marginTop: 20,
+    borderRadius: windowWidth * 0.05,
+    marginHorizontal: windowWidth * 0.1,
+    marginTop: windowHeight * 0.03,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -354,68 +344,68 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 20,
+    width: windowWidth * 0.15,
+    height: windowWidth * 0.15,
+    borderRadius: windowWidth * 0.075,
+    marginRight: windowWidth * 0.05,
   },
   userInfo: {
     flex: 1,
   },
   nameText: {
-    marginLeft: 20,
-    fontSize: 18,
+    marginLeft: windowWidth * 0.05,
+    fontSize: windowHeight * 0.025,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: windowHeight * 0.01,
   },
   secondaryInfo: {
-    marginLeft: 20,
+    marginLeft: windowWidth * 0.05,
   },
   secondaryText: {
-    fontSize: 16,
+    fontSize: windowHeight * 0.02,
     color: "#333",
-    marginBottom: 5,
+    marginBottom: windowHeight * 0.01,
   },
   inputContainer: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+    paddingHorizontal: windowWidth * 0.05,
+    marginTop: windowHeight * 0.03,
   },
   input: {
-    height: 50,
+    height: windowHeight * 0.07,
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
+    borderRadius: windowWidth * 0.05,
+    paddingHorizontal: windowWidth * 0.04,
+    fontSize: windowHeight * 0.02,
   },
   disabledInput: {
-    backgroundColor: "#eee", // Change the background color to indicate it's disabled
-    color: "#999", // Change the text color to indicate it's disabled
+    backgroundColor: "#eee",
+    color: "#999",
   },
   qrContainer: {
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: windowHeight * 0.03,
   },
   noQRText: {
-    fontSize: 16,
+    fontSize: windowHeight * 0.02,
     color: "#777",
   },
   bottomButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 20,
+    paddingHorizontal: windowWidth * 0.05,
+    marginTop: windowHeight * 0.03,
+    marginBottom: windowHeight * 0.03,
   },
   button: {
     backgroundColor: "#007bff",
-    paddingVertical: 15,
+    paddingVertical: windowHeight * 0.03,
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: windowWidth * 0.05,
     flex: 1,
-    marginRight: 10,
+    marginRight: windowWidth * 0.05,
   },
   expireButton: {
     backgroundColor: "#dc3545",
@@ -425,7 +415,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: windowHeight * 0.02,
     fontWeight: "bold",
   },
   disabledButtonText: {
@@ -433,15 +423,15 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: "#007bff",
-    paddingVertical: 15,
+    paddingVertical: windowHeight * 0.03,
     alignItems: "center",
-    borderRadius: 10,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    borderRadius: windowWidth * 0.05,
+    marginHorizontal: windowWidth * 0.05,
+    marginBottom: windowHeight * 0.03,
   },
   shareButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: windowHeight * 0.02,
     fontWeight: "bold",
   },
 });

@@ -23,6 +23,7 @@ const StudentLogin = ({ navigation }) => {
 
 
   const handleSignup = async () => {
+    setLoading(true);
     try {
       const auth = getAuth();
 

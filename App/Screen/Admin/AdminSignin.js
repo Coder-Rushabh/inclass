@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity, ScrollView, ActivityIndicator} from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
 import { db } from '../../firebase'
@@ -9,8 +9,11 @@ const AdminSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // State to manage loading status
+
 
   const handleLogin = async () => {
+    setLoading(true);
     try {
       const auth = getAuth();
       // Sign in with email and password
@@ -49,7 +52,8 @@ const AdminSignin = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.signInText}>Sign In</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput
         style={styles.input}
@@ -66,8 +70,12 @@ const AdminSignin = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Submit</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign in</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.loginTextContainer}>
@@ -81,28 +89,35 @@ const AdminSignin = ({ navigation }) => {
           </Text>
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: '10%',
   },
   input: {
     height: 50,
-    marginBottom: 20,
+    marginBottom: '5%',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
   },
+  signInText: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    marginBottom: 60,
+    textAlign: 'center',
+    color: '#007bff',
+  },
   error: {
     color: 'red',
-    marginBottom: 20,
+    marginBottom: '5%',
     textAlign: 'center',
   },
   button: {
@@ -110,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: '5%',
   },
   buttonText: {
     color: '#fff',
@@ -118,7 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   loginTextContainer: {
-    marginTop: 20,
+    marginTop: '5%',
     alignItems: 'center',
   },
   loginText: {
