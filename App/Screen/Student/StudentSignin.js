@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
-import { db } from '../../firebase'
+import { db } from '../../firebase';
 
 const StudentSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // State to manage loading status
 
   const handleLogin = async () => {
+    setLoading(true); // Set loading to true when login process starts
     try {
       const auth = getAuth();
       // Sign in with email and password
@@ -38,11 +40,14 @@ const StudentSignin = ({ navigation }) => {
     } catch (error) {
       console.error('Login error:', error);
       setError('Incorrect email or password.'); // Set error message
+    } finally {
+      setLoading(false); // Set loading to false when login process ends
     }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.signInText}>Sign In</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput
         style={styles.input}
@@ -59,8 +64,12 @@ const StudentSignin = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Submit</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign in</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.loginTextContainer}>
@@ -68,7 +77,7 @@ const StudentSignin = ({ navigation }) => {
           Don't have an account?{' '}
           <Text
             style={styles.loginLink}
-            onPress={() => navigation.navigate('StudentLogin')}
+            onPress={() => navigation.navigate('StudentSignup')}
           >
             Create here
           </Text>
@@ -83,6 +92,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
+  },
+  signInText: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    marginBottom: 60,
+    textAlign: 'center',
+    color: '#007bff',
   },
   input: {
     height: 50,

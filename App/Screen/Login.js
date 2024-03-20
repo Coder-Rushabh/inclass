@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const Login = ({ navigation }) => {
   const handleStudentLogin = () => {
-    navigation.navigate('StudentSignup');
-
+    navigation.navigate('StudentSignin');
   };
 
   const handleAdminLogin = () => {
-    navigation.navigate('AdminSignup');
+    navigation.navigate('AdminSignin');
   };
 
   return (
@@ -24,6 +26,9 @@ const Login = ({ navigation }) => {
           <Text style={styles.buttonText}>Admin Login</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>© Copyright Rushabh</Text>
+      </View>
     </View>
   );
 };
@@ -37,28 +42,36 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: windowHeight * 0.05,
   },
   logo: {
-    width: 350,
-    height: 350,
+    width: windowWidth * 0.8,
+    height: windowWidth * 0.8, // Maintain aspect ratio
     resizeMode: 'contain',
   },
- 
   buttonContainer: {
     width: '80%',
+    marginBottom: windowHeight * 0.1,
   },
   button: {
     backgroundColor: '#007bff',
     paddingVertical: 15,
     borderRadius: 10,
-    marginBottom: 40,
+    marginBottom: windowHeight * 0.05,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 10,
+  },
+  footerText: {
+    color: '#777',
+    fontSize: 12,
   },
 });
 

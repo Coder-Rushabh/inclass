@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import {
   View,
   TextInput,
-  Button,
-  StyleSheet,
   TouchableOpacity,
   Text,
+  StyleSheet,
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -17,6 +16,8 @@ const StudentLogin = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // State to manage loading status
+
 
   const handleSignup = async () => {
     try {
@@ -46,8 +47,6 @@ const StudentLogin = ({ navigation }) => {
       console.log("User signed up and details saved:", user.uid);
     } catch (error) {
       console.error("Signup error:", error);
-      navigation.navigate("ScanQR", { userInfo: userInfo });
-
       if (error.code === "auth/email-already-in-use") {
         setError("Email is already in use");
       } else {
@@ -58,12 +57,14 @@ const StudentLogin = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.signUpText}>Sign Up</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput
         style={styles.input}
         placeholder="Roll Number"
         value={rollNumber}
-        onChangeText={setRollNumber}
+        onChangeText={(text) => setRollNumber(text.replace(/[^0-9]/g, ""))}
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
@@ -86,9 +87,17 @@ const StudentLogin = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Submit</Text>
+    
+
+      <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign up</Text>
+        )}
       </TouchableOpacity>
+
+
       <View style={styles.loginTextContainer}>
         <Text style={styles.loginText}>
           Already have an account?{" "}
@@ -108,9 +117,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 20,
+    alignItems: "center",
+    paddingHorizontal: "10%",
+  },
+  signUpText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#007bff",
   },
   input: {
+    width: "100%",
     height: 50,
     marginBottom: 20,
     borderWidth: 1,
@@ -120,6 +137,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
+    width: "100%",
     backgroundColor: "#007bff",
     borderRadius: 10,
     paddingVertical: 15,
@@ -134,7 +152,6 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
     marginBottom: 20,
-    textAlign: "center",
   },
   loginTextContainer: {
     marginTop: 20,
