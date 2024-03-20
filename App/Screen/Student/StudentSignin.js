@@ -3,6 +3,9 @@ import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, ActivityIn
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
 import { db } from '../../firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const StudentSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -34,6 +37,9 @@ const StudentSignin = ({ navigation }) => {
       }
 
       console.log(userInfo);
+      
+      await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      await AsyncStorage.setItem('userType', 'student');
 
       // Navigate to ScanQR page with user information
       navigation.navigate("ScanQR", { userInfo: userInfo });

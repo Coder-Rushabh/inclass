@@ -9,6 +9,9 @@ import {
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const StudentLogin = ({ navigation }) => {
   const [rollNumber, setRollNumber] = useState("");
@@ -41,6 +44,9 @@ const StudentLogin = ({ navigation }) => {
         name,
         email,
       };
+      
+      await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      await AsyncStorage.setItem('userType', 'student');
 
       navigation.navigate("ScanQR", { userInfo: userInfo });
 

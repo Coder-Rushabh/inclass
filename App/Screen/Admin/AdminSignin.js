@@ -3,6 +3,7 @@ import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'rea
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
 import { db } from '../../firebase'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AdminSignin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -32,9 +33,15 @@ const AdminSignin = ({ navigation }) => {
       }
 
       console.log(adminInfo);
+     
+      await AsyncStorage.setItem('userInfo', JSON.stringify(adminInfo));
+      await AsyncStorage.setItem('userType', 'admin');
+
 
       // Navigate to AdminDashboard or any other admin page with admin information
       navigation.navigate("GenerateQR", { adminInfo: adminInfo });
+       
+
     } catch (error) {
       console.error('Login error:', error);
       setError('Incorrect email or password.'); // Set error message

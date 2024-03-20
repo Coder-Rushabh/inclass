@@ -3,6 +3,8 @@ import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity} from 'rea
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from '../../firebase'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const AdminSignup = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -27,8 +29,11 @@ const AdminSignup = ({ navigation }) => {
         name,
         email,
       };
+      await AsyncStorage.setItem('userType', 'admin');
 
-      navigation.navigate("GenerateQR", { adminInfo: adminInfo });
+      await AsyncStorage.setItem('userInfo', JSON.stringify(adminInfo));
+      await AsyncStorage.setItem('userType', 'admin');
+
     } catch (error) {
       console.error('Signup error:', error);
       setError('Signup failed. Please try again.');
