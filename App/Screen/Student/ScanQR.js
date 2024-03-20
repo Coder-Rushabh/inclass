@@ -204,7 +204,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
-    marginTop: 20,
   },
   userInfoContainer: {
     flexDirection: "row",

@@ -11,6 +11,8 @@ import Success from './App/Screen/Student/Success';
 import AdminSignin from './App/Screen/Admin/AdminSignin'
 import AdminSignup from './App/Screen/Admin/AdminSignup'
 import GenerateQR from './App/Screen/Admin/GenerateQR';
+import ShowData from './App/Screen/Admin/ShowData';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +34,7 @@ export default function App() {
             <Stack.Screen name="AdminSignup" component={AdminSignup} />
             <Stack.Screen name="AdminSignin" component={AdminSignin} />
             <Stack.Screen name="GenerateQR" component={GenerateQR} />
+            <Stack.Screen name="ShowData" component={ShowData} />
 
            </Stack.Navigator>
        </NavigationContainer>

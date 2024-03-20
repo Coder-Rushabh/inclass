@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "inclass",
+    "name": "InClass",
     "slug": "inclass",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -44,7 +44,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.rushabh2001123.inclass"
+      "package": "com.rushabh.inclass"
     },
     "web": {
       "favicon": "./assets/favicon.png"
