@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  ActivityIndicator
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -112,7 +113,7 @@ const StudentLogin = ({ navigation }) => {
             style={styles.loginLink}
             onPress={() => navigation.navigate("StudentSignin")}
           >
-            Log in
+            Sign in
           </Text>
         </Text>
       </View>

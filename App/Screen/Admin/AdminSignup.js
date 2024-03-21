@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text , TouchableOpacity, ActivityIndicator} from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator
+} from "react-native";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from '../../firebase'
+import { db } from "../../firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
+
 const AdminSignup = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false); // State to manage loading status
 
 
@@ -18,12 +27,15 @@ const AdminSignup = ({ navigation }) => {
     setLoading(true);
     try {
       const auth = getAuth();
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
-      await setDoc(doc(db, "admins", user.uid), {
+      await setDoc(doc(db, "admin", user.uid), {
         name,
         email,
       });
@@ -32,14 +44,20 @@ const AdminSignup = ({ navigation }) => {
         name,
         email,
       };
-      await AsyncStorage.setItem('userType', 'admin');
-
+      
       await AsyncStorage.setItem('userInfo', JSON.stringify(adminInfo));
       await AsyncStorage.setItem('userType', 'admin');
 
+      navigation.navigate("GenerateQR", { adminInfo: adminInfo });
+
+      console.log("User signed up and details saved:", user.uid);
     } catch (error) {
-      console.error('Signup error:', error);
-      setError('Signup failed. Please try again.');
+      console.error("Signup error:", error);
+      if (error.code === "auth/email-already-in-use") {
+        setError("Email is already in use");
+      } else {
+        setError("Signup failed. Please try again later.");
+      }
     }
   };
 
@@ -47,6 +65,7 @@ const AdminSignup = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.signUpText}>Sign Up</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
+    
       <TextInput
         style={styles.input}
         placeholder="Name"
@@ -68,7 +87,9 @@ const AdminSignup = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-     <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={loading}>
+    
+
+      <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={loading}>
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
@@ -76,14 +97,15 @@ const AdminSignup = ({ navigation }) => {
         )}
       </TouchableOpacity>
 
+
       <View style={styles.loginTextContainer}>
         <Text style={styles.loginText}>
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Text
             style={styles.loginLink}
-            onPress={() => navigation.navigate('AdminSignin')}
+            onPress={() => navigation.navigate("AdminSignin")}
           >
-            Log in 
+            Sign in
           </Text>
         </Text>
       </View>
