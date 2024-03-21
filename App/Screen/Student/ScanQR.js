@@ -54,64 +54,48 @@ const ScanQR = ({ route }) => {
   const handleScan = async ({ type, data }) => {
     if (!isScanned && type === BarCodeScanner.Constants.BarCodeType.qr) {
       setIsScanned(true);
-  
+      console.log("Scanned QR Code:", data);
+
       try {
-        let qrData;
-  
-        // Check if the data is a URI
-        if (data.startsWith("file://")) {
-          // Decode QR code from the image URI
-          const qrCodeResult = await BarCodeScanner.scanFromURLAsync(data);
-          console.log("QR Code Result:", qrCodeResult);
-  
-          if (
-            qrCodeResult.type !== BarCodeScanner.Constants.BarCodeType.qr ||
-            !qrCodeResult.data
-          ) {
-            throw new Error("No QR code found in the selected image.");
-          }
-  
-          // Set qrData to the decoded QR code data
-          qrData = qrCodeResult.data;
-        } else {
-          // If the data is not a URI, parse it as JSON
-          qrData = JSON.parse(data);
-        }
-  
+        const qrData = JSON.parse(data);
+
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           console.log("Permission to access location was denied");
           return;
         }
-  
+
         // Get current location
         const { coords } = await Location.getCurrentPositionAsync({});
-  
+
         // Check if location matches within 50 meters
         const locationWithinRange =
           Math.abs(qrData.latitude - coords.latitude) <= 0.00045 &&
           Math.abs(qrData.longitude - coords.longitude) <= 0.00045;
-  
+
         // Check if date matches
         const currentDate = new Date();
         const formattedDate = currentDate.toISOString().split("T")[0];
         const dateMatches = formattedDate === qrData.date;
-  
+
         if (locationWithinRange && dateMatches) {
           // Upload student's data to Firestore under UID provided in QR code
+
           await setDoc(doc(db, "attendance", qrData.uid.toString()), {
             [userInfo.rollNumber]: {
               name: userInfo.name,
             },
           });
-  
+
           const adminDetails = {
             name: qrData.name,
             subject: qrData.subject,
           };
-  
+
           // Navigate to success page and pass admin details
-          navigation.navigate("Success", { adminDetails: adminDetails });
+          navigation.navigate("Success", { adminDetails : adminDetails });
+
+
         } else {
           alert("Location or date mismatch. Attendance not marked.");
         }
@@ -121,7 +105,7 @@ const ScanQR = ({ route }) => {
       }
     }
   };
-
+  
   const openGallery = async () => {
     const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     const cameraPermission = await Camera.requestCameraPermissionsAsync();

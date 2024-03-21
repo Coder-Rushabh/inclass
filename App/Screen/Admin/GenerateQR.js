@@ -10,7 +10,7 @@ import {
   Share,
   Alert,
   Platform,
-  Dimensions 
+  Dimensions,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as FileSystem from "expo-file-system";
@@ -22,17 +22,14 @@ import {
   getDocs,
   query,
   deleteDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { BackHandler } from "react-native";
-import ViewShot from 'react-native-view-shot';
-import ShareExtension from 'react-native-share-extension';
+import ViewShot from "react-native-view-shot";
 
-
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
-
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const GenerateQR = ({ route, navigation }) => {
   const { adminInfo } = route.params;
@@ -55,32 +52,27 @@ const GenerateQR = ({ route, navigation }) => {
     return () => backHandler.remove();
   }, []);
 
-
   const handleExpireQR = async () => {
     try {
-      console.log(qrValue)
-
+      console.log(qrValue);
 
       let qrData;
-    if (typeof qrValue === 'string') {
-      // Parse qrValue if it's a string
-      qrData = JSON.parse(qrValue);
-    } else {
-      qrData = qrValue;
-    }
+      if (typeof qrValue === "string") {
+        // Parse qrValue if it's a string
+        qrData = JSON.parse(qrValue);
+      } else {
+        qrData = qrValue;
+      }
       const uid = qrData?.uid;
 
-      console.log(uid)
-      
+      console.log(uid);
 
       // Clear QR value and subject name
       setQRValue("");
       setSubjectName("");
-  
+      fetchData();
       // Navigate user to ShowData page and pass student details as props
-      navigation.navigate('ShowData')
       // Delete the document associated with the UID
-      await deleteAttendanceData(uid);
     } catch (error) {
       console.error("Error expiring QR code:", error);
     }
@@ -95,19 +87,21 @@ const GenerateQR = ({ route, navigation }) => {
 
       // Share the image using the Share API
       await shareImage(uri);
-
     } catch (error) {
-      console.error('Error sharing QR code:', error);
+      console.error("Error sharing QR code:", error);
     }
   };
 
   const captureQRCode = async () => {
     return new Promise((resolve, reject) => {
-      viewShotRef.current.capture().then(uri => {
-        resolve(uri);
-      }).catch(error => {
-        reject(error);
-      });
+      viewShotRef.current
+        .capture()
+        .then((uri) => {
+          resolve(uri);
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   };
 
@@ -117,50 +111,35 @@ const GenerateQR = ({ route, navigation }) => {
     };
 
     try {
-      if (Platform.OS === 'android') {
+      if (Platform.OS === "android") {
         await ShareExtension.open(shareOptions);
       } else {
         await Share.share(shareOptions);
       }
     } catch (error) {
-      console.error('Error sharing image:', error);
+      console.error("Error sharing image:", error);
     }
   };
-  
+
   const getStudentDetails = async (uid) => {
     const studentDetails = [];
     console.log("uid", uid);
-    
+
     try {
       // Reference the "attendance" collection and the document with the provided UID
 
       const querySnapshot = await getDocs(collection(db, "attendance", uid));
-    console.log("Query Snapshot:", querySnapshot);
+      console.log("Query Snapshot:", querySnapshot);
 
-  
       // querySnapshot.forEach((doc) => {
       //   // Push the entire document data into the studentDetails array
       //   studentDetails.push(doc.data());
       // });
-      
+
       return studentDetails;
     } catch (error) {
       console.error("Error fetching student details:", error);
       return []; // Return an empty array in case of an error
-    }
-  };
-  
-  const deleteAttendanceData = async (uid) => {
-    try {
-      // Query documents under "attendance" collection with the specified UID
-      const documentRef = doc(db, 'attendance', uid);
-
-      // Delete the document
-      await deleteDoc(documentRef);
-  
-      console.log(`Attendance data for UID ${uid} deleted successfully.`);
-    } catch (error) {
-      console.error('Error deleting attendance data:', error);
     }
   };
 
@@ -224,9 +203,65 @@ const GenerateQR = ({ route, navigation }) => {
     );
   };
 
- 
+  // Function to fetch data from Firestore
 
- 
+  const fetchData = async () => {
+    let qrData;
+    if (typeof qrValue === "string") {
+      // Parse qrValue if it's a string
+      qrData = JSON.parse(qrValue);
+    } else {
+      qrData = qrValue;
+    }
+    const uiid = qrData?.uid;
+    console.log("qrdata :", qrData);
+    console.log(uiid);
+
+
+      try {
+        const attendanceQuery = query(collection(db, "attendance"));
+        const querySnapshot = await getDocs(attendanceQuery);
+        let attendanceIds = []; // Array to store document IDs
+        let attendanceInfo = []; // Array to store attendance info objects
+      
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach(async (doc) => {
+            const docId = doc.id;
+            console.log("docID : ", docId);
+      
+            attendanceIds.push(docId);
+      
+            // Extract data from the document
+            const data = doc.data();
+            const rollNames = Object.entries(data);
+      
+            // Iterate over each roll and name pair
+            rollNames.forEach(([roll, nameObj]) => {
+              const name = nameObj.name;
+              if (docId == uiid) {
+              // Push roll and name object to the attendanceInfo array
+              attendanceInfo.push({ roll, name });
+              }
+            });
+      
+            console.log(attendanceInfo);
+          });
+      
+          console.log(attendanceInfo);
+          navigation.navigate("ShowData", { attendanceInfo: attendanceInfo , qrValue: qrValue});
+          console.log("All document IDs:", attendanceIds); // Log the array of IDs
+        } else {
+          console.log("No documents found in the 'attendance' collection");
+        }
+  
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Function to delete data from Firestore
+  
 
   return (
     <View style={styles.container}>
@@ -248,14 +283,14 @@ const GenerateQR = ({ route, navigation }) => {
       </View>
 
       <View style={styles.inputContainer}>
-  <TextInput
-    style={[styles.input, qrValue && styles.disabledInput]} // Apply disabled style if qrValue is truthy
-    placeholder="Enter a subject name"
-    value={subjectName}
-    onChangeText={setSubjectName}
-    editable={!qrValue} // Disable editing if qrValue is truthy
-  />
-</View>
+        <TextInput
+          style={[styles.input, qrValue && styles.disabledInput]} // Apply disabled style if qrValue is truthy
+          placeholder="Enter a subject name"
+          value={subjectName}
+          onChangeText={setSubjectName}
+          editable={!qrValue} // Disable editing if qrValue is truthy
+        />
+      </View>
 
       <ScrollView contentContainerStyle={styles.qrContainer}>
         {qrValue ? (
@@ -300,6 +335,7 @@ const GenerateQR = ({ route, navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
+      
 
       {/* {qrValue ? (
         <TouchableOpacity style={styles.shareButton} onPress={handleShareQRCode}>
@@ -308,7 +344,6 @@ const GenerateQR = ({ route, navigation }) => {
       ) : null} */}
     </View>
   );
-
 };
 
 const styles = StyleSheet.create({
