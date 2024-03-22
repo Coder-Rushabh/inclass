@@ -35,7 +35,7 @@ const AdminSignup = ({ navigation }) => {
       );
       const user = userCredential.user;
 
-      await setDoc(doc(db, "admin", user.uid), {
+      await setDoc(doc(db, "admins", user.uid), {
         name,
         email,
       });
@@ -46,7 +46,7 @@ const AdminSignup = ({ navigation }) => {
       };
       
       await AsyncStorage.setItem('userInfo', JSON.stringify(adminInfo));
-      await AsyncStorage.setItem('userType', 'admin');
+      await AsyncStorage.setItem('userType', 'admins');
 
       navigation.navigate("GenerateQR", { adminInfo: adminInfo });
 

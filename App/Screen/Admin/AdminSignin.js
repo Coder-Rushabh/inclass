@@ -38,7 +38,7 @@ const AdminSignin = ({ navigation }) => {
       console.log(adminInfo);
      
       await AsyncStorage.setItem('userInfo', JSON.stringify(adminInfo));
-      await AsyncStorage.setItem('userType', 'admin');
+      await AsyncStorage.setItem('userType', 'admins');
 
 
       // Navigate to AdminDashboard or any other admin page with admin information

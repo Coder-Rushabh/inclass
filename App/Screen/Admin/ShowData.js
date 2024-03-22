@@ -110,9 +110,9 @@ const ShowData = ({ route, navigation }) => {
         ))}
       </DataTable>
 
-      <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
+      {/* <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
         <Text style={styles.downloadButtonText}>Download</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

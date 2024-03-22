@@ -29,8 +29,8 @@ const AppNavigator = () => {
   useEffect(() => {
     async function checkUserTypeAndNavigate() {
       try {
-        //const userType = await AsyncStorage.getItem('userType');
-        const userType = false
+        const userType = await AsyncStorage.getItem('userType');
+        //const userType = false
         if (userType === 'student') {
           const userInfoString = await AsyncStorage.getItem('userInfo');
           const userInfo = JSON.parse(userInfoString);
@@ -40,7 +40,7 @@ const AppNavigator = () => {
             console.log('No userInfo found in AsyncStorage');
             navigation.navigate('Login');
           }
-        } else if (userType === 'admin') {
+        } else if (userType === 'admins') {
           const adminInfoString = await AsyncStorage.getItem('adminInfo');
           const adminInfo = JSON.parse(adminInfoString);
           if (adminInfo) {
